@@ -1,0 +1,11 @@
+{
+    "token": "token",
+    "database": {
+        "host": "host",
+        "port": "3306",
+        "username" : "hyperbot",
+        "password": "password",
+        "database": "hyperbotquotes"
+    },
+    "servers": ["986751481061449768", "1023990503928254544"]
+}
