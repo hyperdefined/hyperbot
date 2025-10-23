@@ -126,7 +126,7 @@
         <dependency>
             <groupId>com.github.supern64</groupId>
             <artifactId>owoify</artifactId>
-            <version>master-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 </project>
