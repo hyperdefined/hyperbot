@@ -80,7 +80,7 @@
         <dependency>
             <groupId>com.github.discord-jda</groupId>
             <artifactId>JDA</artifactId>
-            <version>v6.1.1</version>
+            <version>v6.1.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>club.minnced</groupId>
