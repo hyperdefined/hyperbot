@@ -1,5 +1,6 @@
 package lol.hyper.hyperbot.bot.events;
 
+import lol.hyper.hyperbot.HyperBot;
 import lol.hyper.hyperbot.bot.DiscordHyperBot;
 import lol.hyper.hyperbot.bot.commands.CommandOwO;
 import lol.hyper.hyperbot.bot.commands.CommandQuote;
@@ -27,6 +28,12 @@ public class ChatListener extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+        String guild = event.getGuild().getId();
+        if (!HyperBot.getServers().contains(guild)) {
+            // ignore servers we don't approve the bot in
+            return;
+        }
+
         ChannelType type = event.getChannelType();
         User user = event.getAuthor();
         // ignore self
