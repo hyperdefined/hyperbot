@@ -26,6 +26,7 @@ public class SlashCommandListener extends ListenerAdapter {
         String guild = event.getGuild().getId();
         if (!HyperBot.getServers().contains(guild)) {
             // ignore servers we don't approve the bot in
+            event.reply("Sorry, I can't use commands in this server!").setEphemeral(true).queue();
             return;
         }
 
