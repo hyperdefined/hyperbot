@@ -23,7 +23,7 @@ public class JSONUtils {
     /**
      * HttpClient for requests.
      */
-    private static final HttpClient client = HttpClient.newHttpClient();
+    public static final HttpClient client = HttpClient.newHttpClient();
 
     /**
      * Read contents of a file.

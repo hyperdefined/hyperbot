@@ -2,6 +2,7 @@ package lol.hyper.hyperbot.bot;
 
 import lol.hyper.hyperbot.bot.events.ChatListener;
 import lol.hyper.hyperbot.bot.events.GatewayPingListener;
+import lol.hyper.hyperbot.bot.events.ReadyListener;
 import lol.hyper.hyperbot.bot.events.SlashCommandListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -22,6 +23,7 @@ public class DiscordHyperBot {
 
     private final ZonedDateTime startTime;
     private final JDA DISCORD_BOT;
+    private final HourlyWolf hourlyWolf;
 
     public DiscordHyperBot(JSONObject config) {
         startTime = ZonedDateTime.now(ZoneId.of("America/New_York"));
@@ -39,6 +41,10 @@ public class DiscordHyperBot {
         DISCORD_BOT.addEventListener(slashCommandListener);
         GatewayPingListener gatewayPingListener = new GatewayPingListener();
         DISCORD_BOT.addEventListener(gatewayPingListener);
+
+        hourlyWolf = new HourlyWolf(this, config.getString("unsplashKey"), config.getString("hourlyWolfServer"), config.getString("hourlyWolfChannel"));
+        ReadyListener readyEvent = new ReadyListener(hourlyWolf);
+        DISCORD_BOT.addEventListener(readyEvent);
 
         logger.info("Adding slash commands...");
         CommandListUpdateAction commands = DISCORD_BOT.updateCommands();
@@ -60,6 +66,10 @@ public class DiscordHyperBot {
 
     public JDA bot() {
         return DISCORD_BOT;
+    }
+
+    public HourlyWolf getHourlyWolf() {
+        return hourlyWolf;
     }
 
     public ZonedDateTime startTime() {
