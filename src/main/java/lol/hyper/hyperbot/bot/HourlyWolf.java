@@ -71,21 +71,19 @@ public class HourlyWolf {
         }
 
         String color = wolfyData.getString("color");
-        JSONObject links = wolfyData.getJSONObject("urls");
+        JSONObject urls = wolfyData.getJSONObject("urls");
+        JSONObject links = wolfyData.getJSONObject("links");
+        String permalink = links.getString("html");
         String author = wolfyData.getJSONObject("user").getString("name");
+        String authorLink = wolfyData.getJSONObject("user").getJSONObject("links").getString("html");
         String description = null;
+        Instant instant = Instant.parse(wolfyData.getString("created_at"));
 
         if (!wolfyData.isNull("description")) {
             description = wolfyData.getString("description");
         } else if (!wolfyData.isNull("alt_description")) {
             description = wolfyData.getString("alt_description");
         }
-
-        Instant instant = Instant.parse(wolfyData.getString("created_at"));
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                .withZone(ZoneId.systemDefault());
-
-        String footer = author + " - " + formatter.format(instant);
 
         Guild guild = discordHyperBot.bot().getGuildById(server);
         if (guild == null) {
@@ -94,7 +92,6 @@ public class HourlyWolf {
         }
 
         TextChannel channelToPost = guild.getTextChannelById(channel);
-
         if (channelToPost == null) {
             logger.warn("Unable to find wolfy channel to post in.");
             return;
@@ -104,8 +101,10 @@ public class HourlyWolf {
         embed.setTitle("Wolf of the Hour");
         embed.setDescription(description);
         embed.setColor(Color.decode(color));
-        embed.setImage(links.getString("regular"));
-        embed.setFooter(footer);
+        embed.setImage(urls.getString("regular"));
+        embed.setTimestamp(instant);
+        embed.addField("Source", "[Permalink](" + permalink + ")", true);
+        embed.addField("Author", "[" + author + "](" + authorLink + ")", true);
 
         channelToPost.sendMessageEmbeds(embed.build()).queue();
         logger.info("Next run: {}", Instant.ofEpochMilli(nextRunMillis.get()));
@@ -117,7 +116,7 @@ public class HourlyWolf {
      * @return The response JSONObject. Returns null if there was some issue.
      */
     private JSONObject fetch() {
-        logger.info("Fetching JSONObject from {}", "https://api.unsplash.com/photos/random?query=wolf");
+        logger.info("Fetching JSONObject from {}", "https://api.unsplash.com/photos/random?query=wolf%20animal");
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://api.unsplash.com/photos/random?query=wolf"))
