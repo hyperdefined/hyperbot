@@ -14,8 +14,6 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -26,17 +24,15 @@ public class HourlyWolf {
     private final ScheduledExecutorService scheduler;
     private final Logger logger = LogManager.getLogger(this);
     private final DiscordHyperBot discordHyperBot;
-    private final String key;
     private final String server;
     private final String channel;
 
     private final long PERIOD_MILLIS = TimeUnit.HOURS.toMillis(1);
     private final AtomicLong nextRunMillis = new AtomicLong();
 
-    public HourlyWolf(DiscordHyperBot discordHyperBot, String key, String server, String channel) {
+    public HourlyWolf(DiscordHyperBot discordHyperBot, String server, String channel) {
         this.scheduler = Executors.newScheduledThreadPool(1);
         this.discordHyperBot = discordHyperBot;
-        this.key = key;
         this.server = server;
         this.channel = channel;
     }
@@ -70,20 +66,8 @@ public class HourlyWolf {
             return;
         }
 
-        String color = wolfyData.getString("color");
-        JSONObject urls = wolfyData.getJSONObject("urls");
-        JSONObject links = wolfyData.getJSONObject("links");
-        String permalink = links.getString("html");
-        String author = wolfyData.getJSONObject("user").getString("name");
-        String authorLink = wolfyData.getJSONObject("user").getJSONObject("links").getString("html");
-        String description = null;
-        Instant instant = Instant.parse(wolfyData.getString("created_at"));
-
-        if (!wolfyData.isNull("description")) {
-            description = wolfyData.getString("description");
-        } else if (!wolfyData.isNull("alt_description")) {
-            description = wolfyData.getString("alt_description");
-        }
+        String path = wolfyData.getString("loc");
+        String fullPath = "https://api.tinyfox.dev" + path;
 
         Guild guild = discordHyperBot.bot().getGuildById(server);
         if (guild == null) {
@@ -99,12 +83,9 @@ public class HourlyWolf {
 
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Wolf of the Hour");
-        embed.setDescription(description);
-        embed.setColor(Color.decode(color));
-        embed.setImage(urls.getString("regular"));
-        embed.setTimestamp(instant);
-        embed.addField("Source", "[Permalink](" + permalink + ")", true);
-        embed.addField("Author", "[" + author + "](" + authorLink + ")", true);
+        embed.setColor(Color.BLACK);
+        embed.setTimestamp(Instant.now());
+        embed.setImage(fullPath);
 
         channelToPost.sendMessageEmbeds(embed.build()).queue();
         logger.info("Next run: {}", Instant.ofEpochMilli(nextRunMillis.get()));
@@ -116,14 +97,13 @@ public class HourlyWolf {
      * @return The response JSONObject. Returns null if there was some issue.
      */
     private JSONObject fetch() {
-        logger.info("Fetching JSONObject from {}", "https://api.unsplash.com/photos/random?query=wolf%20animal");
+        String WOLF_URL = "https://api.tinyfox.dev/img?animal=woof&json";
+        logger.info("Fetching JSONObject from {}", WOLF_URL);
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.unsplash.com/photos/random?query=wolf"))
+                    .uri(URI.create(WOLF_URL))
                     .header("Accept", "application/json")
                     .header("User-Agent", HyperBot.getUserAgent())
-                    .header("Accept-Version", "v1")
-                    .header("Authorization", "Client-ID " + key)
                     .GET()
                     .build();
 
@@ -135,7 +115,7 @@ public class HourlyWolf {
                 logger.error(
                         "HTTP status code {} for {} in getting JSONObject",
                         response.statusCode(),
-                        "https://api.unsplash.com/photos/random?query=wolf"
+                        WOLF_URL
                 );
                 return null;
             }

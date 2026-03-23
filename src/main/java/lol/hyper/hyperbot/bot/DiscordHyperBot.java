@@ -23,7 +23,6 @@ public class DiscordHyperBot {
 
     private final ZonedDateTime startTime;
     private final JDA DISCORD_BOT;
-    private final HourlyWolf hourlyWolf;
 
     public DiscordHyperBot(JSONObject config) {
         startTime = ZonedDateTime.now(ZoneId.of("America/New_York"));
@@ -42,7 +41,7 @@ public class DiscordHyperBot {
         GatewayPingListener gatewayPingListener = new GatewayPingListener();
         DISCORD_BOT.addEventListener(gatewayPingListener);
 
-        hourlyWolf = new HourlyWolf(this, config.getString("unsplashKey"), config.getString("hourlyWolfServer"), config.getString("hourlyWolfChannel"));
+        HourlyWolf hourlyWolf = new HourlyWolf(this, config.getString("hourlyWolfServer"), config.getString("hourlyWolfChannel"));
         ReadyListener readyEvent = new ReadyListener(hourlyWolf);
         DISCORD_BOT.addEventListener(readyEvent);
 
@@ -66,10 +65,6 @@ public class DiscordHyperBot {
 
     public JDA bot() {
         return DISCORD_BOT;
-    }
-
-    public HourlyWolf getHourlyWolf() {
-        return hourlyWolf;
     }
 
     public ZonedDateTime startTime() {
